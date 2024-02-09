@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  RESEARCHER
+  REVIEWER
+  ADMIN
+}
+
+enum Level {
+  UNDERGRADUATE
+  PGD
+  MSC
+  PhD
+}
+
+enum Program {
+  COMPUTER_SCIENCE
+  ENVITONMENTAL_SCIENCE
+  SCIENCE
+  HEALTH
+  MANAGEMENT
+  HUMANITIES
+}
+
+model User {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  username String  @unique
+  email    String  @unique
+  password String
+  document String?
+
+  role    Role    @default(STUDENT)
+  level   Level   @default(UNDERGRADUATE)
+  program Program @default(COMPUTER_SCIENCE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

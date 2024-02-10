@@ -4,6 +4,7 @@ import { catchAsync } from "../utils/catchAsync";
 import {
   createUser,
   findUserByEmail,
+  findUserById,
   findUserByUsername,
   updateUserPass,
 } from "../services/auth.services";
@@ -117,7 +118,7 @@ export const createNewAccessToken = catchAsync(
 
 export const updateUserPassword = catchAsync(
   async (req: IUpdateUserRequest, res: Response<IAuthResponse>) => {
-    const user = await prisma.user.findUnique({ where: { id: req.user } });
+    const user = await findUserById(req.user);
     if (!user) throw new ErrorHandler("User doesn't exist", 404);
 
     const body: IUpdateUserRequest = req.body;
@@ -136,9 +137,12 @@ export const updateUserPassword = catchAsync(
 
 export const deleteAccount = catchAsync(
   async (req: IUpdateUserRequest, res: Response<IAuthResponse>) => {
+    const user = await findUserById(req.user);
+    if (!user) throw new ErrorHandler("User doesn't exist", 404);
+
     await prisma.user.delete({
       where: {
-        id: req.user,
+        id: user.id,
       },
     });
 

@@ -15,6 +15,14 @@ export const createUser = async (data: TRegisterSchema) => {
   });
 };
 
+export const findUserById = async (id: string | undefined) => {
+  return await prisma.user.findUnique({
+    where: {
+      id,
+    },
+  });
+};
+
 export const updateUserPass = async (
   oldPassword: string,
   newPassword: string

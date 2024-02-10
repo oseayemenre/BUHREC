@@ -29,6 +29,6 @@ router.patch("/update-password", privateRoute, updateUserPassword);
 
 router.delete("/delete-account", privateRoute, deleteAccount);
 
-router.get("logout", privateRoute, logout);
+router.get("/logout", privateRoute, logout);
 
 export { router as authRoute };

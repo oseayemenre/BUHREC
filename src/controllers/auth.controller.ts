@@ -146,6 +146,11 @@ export const deleteAccount = catchAsync(
       },
     });
 
+    res.cookie("access_token", "", {
+      httpOnly: true,
+      maxAge: 0,
+    });
+
     res.status(200).json({
       status: "success",
       message: "User succesfully deleted",

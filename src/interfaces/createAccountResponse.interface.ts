@@ -1,5 +1,5 @@
 export interface ICreateAccountResponse {
-  status: "success" | "failed";
+  status: "success";
   message: string;
   accessToken: string;
   data: Record<string, any>;

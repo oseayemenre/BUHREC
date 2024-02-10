@@ -2,7 +2,9 @@ import { Router } from "express";
 import {
   createAccount,
   createNewAccessToken,
+  deleteAccount,
   login,
+  logout,
   updateUserPassword,
 } from "../controllers/auth.controller";
 import { validateSchema } from "../middleware/validateSchema.middleware";
@@ -24,5 +26,9 @@ router.post("/login", publicRoute, validateSchema(loginSchema), login);
 router.get("/token", publicRoute, createNewAccessToken);
 
 router.patch("/update-password", privateRoute, updateUserPassword);
+
+router.delete("/delete-account", privateRoute, deleteAccount);
+
+router.get("logout", privateRoute, logout);
 
 export { router as authRoute };

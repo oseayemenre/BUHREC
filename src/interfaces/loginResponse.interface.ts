@@ -1,5 +1,5 @@
 export interface ILoginResponse {
-  status: "success" | "failed";
+  status: "success";
   message: string;
   accessToken: string;
   refreshToken: string;

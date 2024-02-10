@@ -14,3 +14,18 @@ export const createUser = async (data: TRegisterSchema) => {
     data,
   });
 };
+
+export const updateUserPass = async (
+  oldPassword: string,
+  newPassword: string
+) => {
+  return await prisma.user.update({
+    where: {
+      password: oldPassword,
+    },
+
+    data: {
+      password: newPassword,
+    },
+  });
+};

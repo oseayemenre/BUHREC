@@ -1,5 +1,5 @@
 export interface IErrorMiddleWare {
-  status: "success" | "failed";
+  status: "failed";
   message: string;
   stackTrace: string | null | undefined;
 }

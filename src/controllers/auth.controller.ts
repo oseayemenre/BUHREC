@@ -5,6 +5,7 @@ import {
   createUser,
   findUserByEmail,
   findUserByUsername,
+  updateUserPass,
 } from "../services/auth.services";
 import { ErrorHandler } from "../utils/errorHandler";
 import { generateToken } from "../utils/jwt";
@@ -18,7 +19,8 @@ import jwt, { type JwtPayload } from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 import { sendmail } from "../utils/sendMail";
 import { prisma } from "../utils/prisma";
-import { IRequestMiddleWare } from "../interfaces/responseMiddleWare,interface";
+import { type IUpdateUserRequest } from "../interfaces/updateUserRequest.interface";
+import { type IAuthResponse } from "../interfaces/authResponse.interface";
 
 export const createAccount = catchAsync(
   async (
@@ -95,9 +97,13 @@ export const createNewAccessToken = catchAsync(
 
     const accessToken = generateToken({ id: decoded.id }, ACCESS_SECRET);
     const refreshToken = generateToken({ id: decoded.id }, REFRESH_SECRET);
-    res.cookie("access_token", accessToken, { maxAge: 25 * 60 * 1000 });
+    res.cookie("access_token", accessToken, {
+      maxAge: 25 * 60 * 1000,
+      httpOnly: true,
+    });
     res.cookie("refresh_token", refreshToken, {
       maxAge: 30 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
     });
 
     res.status(200).json({
@@ -110,13 +116,49 @@ export const createNewAccessToken = catchAsync(
 );
 
 export const updateUserPassword = catchAsync(
-  async (req: IRequestMiddleWare, res: Response) => {
+  async (req: IUpdateUserRequest, res: Response<IAuthResponse>) => {
     const user = await prisma.user.findUnique({ where: { id: req.user } });
     if (!user) throw new ErrorHandler("User doesn't exist", 404);
 
-    const body: IRequestMiddleWare = req.body;
+    const body: IUpdateUserRequest = req.body;
     const { password } = body;
 
-    console.log(password);
+    const hashPassword = await bcrypt.hash(password, 12);
+
+    await updateUserPass(user.password, hashPassword);
+
+    res.status(200).json({
+      status: "success",
+      message: "Password succesfuly updated",
+    });
+  }
+);
+
+export const deleteAccount = catchAsync(
+  async (req: IUpdateUserRequest, res: Response<IAuthResponse>) => {
+    await prisma.user.delete({
+      where: {
+        id: req.user,
+      },
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: "User succesfully deleted",
+    });
+  }
+);
+
+export const logout = catchAsync(
+  async (req: Request, res: Response<IAuthResponse>) => {
+    res.cookie("access_token", "", {
+      httpOnly: true,
+      maxAge: 0,
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: "User logged out",
+    });
   }
 );

@@ -1,5 +1,5 @@
 import { type NextFunction, type Response, type Request } from "express";
-import { type IRequestMiddleWare } from "../interfaces/responseMiddleWare,interface";
+import { type IRequestMiddleWare } from "../interfaces/requestMiddleWare.interface";
 import { ErrorHandler } from "../utils/errorHandler";
 import jwt, { type JwtPayload } from "jsonwebtoken";
 import { ACCESS_SECRET } from "../secret";
@@ -10,8 +10,6 @@ export const privateRoute = (
   next: NextFunction
 ) => {
   const token: string = req.cookies.access_token;
-
-  console.log(token);
 
   if (!token) throw new ErrorHandler("Token not found", 404);
 
@@ -30,6 +28,6 @@ export const publicRoute = (
   next: NextFunction
 ) => {
   const token: string = req.cookies.access_token;
-  if (token) throw new ErrorHandler("User already logged in", 404);
+  if (token) throw new ErrorHandler("User already logged in", 400);
   return next();
 };

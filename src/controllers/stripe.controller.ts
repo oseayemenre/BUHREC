@@ -1,7 +1,7 @@
 import { URL } from "../secret";
 import { catchAsync } from "../utils/catchAsync";
 import { stripe } from "../utils/stripe";
-import { type Request, type Response } from "express";
+import { type Response } from "express";
 import { IRequestMiddleWare } from "../interfaces/requestMiddleWare.interface";
 import { prisma } from "../utils/prisma";
 
@@ -16,7 +16,7 @@ export const checkOutSession = catchAsync(
     if (user && user.stripeCustomerId) {
       const billingPortal = await stripe.billingPortal.sessions.create({
         customer: user.stripeCustomerId,
-        return_url: `${URL}`,
+        return_url: URL,
       });
 
       return res.json(200).json({
@@ -45,8 +45,8 @@ export const checkOutSession = catchAsync(
         },
       ],
       mode: "subscription",
-      success_url: "http://localhost:3000/",
-      cancel_url: "http://localhost:3000/",
+      success_url: URL,
+      cancel_url: URL,
       billing_address_collection: "auto",
     });
 

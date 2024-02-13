@@ -45,3 +45,15 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model UserSubscription {
+  id                     String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId                 String  @unique
+  stripeCustomerId       String? @map(name: "stripe_customer_id")
+  stripePriceId          String? @map(name: "stripe_price_id")
+  stripeSubscriptionId   String? @map(name: "stripe_subscription_id")
+  stripeCurrentPeriodEnd String? @map(name: "stripe_current_period_end")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

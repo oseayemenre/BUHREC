@@ -5,7 +5,7 @@ import { type Response } from "express";
 import { IRequestMiddleWare } from "../interfaces/requestMiddleWare.interface";
 import { prisma } from "../utils/prisma";
 
-export const checkOutSession = catchAsync(
+export const createSession = catchAsync(
   async (req: IRequestMiddleWare, res: Response) => {
     const user = await prisma.userSubscription.findUnique({
       where: {

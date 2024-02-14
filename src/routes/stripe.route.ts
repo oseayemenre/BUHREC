@@ -1,8 +1,9 @@
 import { Router } from "express";
-import { checkOutSession } from "../controllers/stripe.controller";
+import { createSession } from "../controllers/stripe.controller";
+import { privateRoute } from "../middleware/auth.middleware";
 
 const router: Router = Router();
 
-router.get("/checkout-session", checkOutSession);
+router.get("/create-session", privateRoute, createSession);
 
 export { router as stripeRoute };

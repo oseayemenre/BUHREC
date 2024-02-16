@@ -10,3 +10,4 @@ export const SMTP_USER = process.env.SMTP_USER!;
 export const SMTP_PASS = process.env.SMTP_PASS!;
 export const STRIPE_API_KEY = process.env.STRIPE_API_KEY!;
 export const URL = process.env.URL!;
+export const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET!;

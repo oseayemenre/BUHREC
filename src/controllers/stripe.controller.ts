@@ -1,9 +1,10 @@
-import { URL } from "../secret";
+import { URL, WEBHOOK_SECRET } from "../secret";
 import { catchAsync } from "../utils/catchAsync";
 import { stripe } from "../utils/stripe";
-import { type Response } from "express";
+import { NextFunction, type Response } from "express";
 import { IRequestMiddleWare } from "../interfaces/requestMiddleWare.interface";
 import { prisma } from "../utils/prisma";
+import Stripe from "stripe";
 
 export const createSession = catchAsync(
   async (req: IRequestMiddleWare, res: Response) => {
@@ -53,3 +54,12 @@ export const createSession = catchAsync(
     return res.status(200).json({ url: session.url });
   }
 );
+
+export const webhook = catchAsync(async (req: Request, res: Response) => {
+  const signature = req.headers.get("stripe-Signature") as string;
+  const body = await req.text();
+
+  let event: Stripe.Event;
+
+  stripe.webhooks.constructEvent(body, signature, WEBHOOK_SECRET);
+});

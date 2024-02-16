@@ -1,9 +1,13 @@
 import { Router } from "express";
-import { createSession } from "../controllers/stripe.controller";
+import { createSession, webhook } from "../controllers/stripe.controller";
 import { privateRoute } from "../middleware/auth.middleware";
 
 const router: Router = Router();
 
-router.get("/create-session", privateRoute, createSession);
+router.use(privateRoute);
+
+router.get("/create-session", createSession);
+
+router.post("/webhook", webhook);
 
 export { router as stripeRoute };

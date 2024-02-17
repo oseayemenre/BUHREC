@@ -1,18 +1,17 @@
 import { URL, WEBHOOK_SECRET } from "../secret";
 import { catchAsync } from "../utils/catchAsync";
 import { stripe } from "../utils/stripe";
-import { NextFunction, type Response } from "express";
+import { type Response } from "express";
 import { IRequestMiddleWare } from "../interfaces/requestMiddleWare.interface";
-import { prisma } from "../utils/prisma";
 import Stripe from "stripe";
+import { findUserSubscription } from "../services/stripe.services";
+import { ErrorHandler } from "../utils/errorHandler";
+import { prisma } from "../utils/prisma";
+import { IResponse } from "../interfaces/indexResponse.interface";
 
 export const createSession = catchAsync(
   async (req: IRequestMiddleWare, res: Response) => {
-    const user = await prisma.userSubscription.findUnique({
-      where: {
-        userId: req.user,
-      },
-    });
+    const user = await findUserSubscription(req.user as string);
 
     if (user && user.stripeCustomerId) {
       const billingPortal = await stripe.billingPortal.sessions.create({
@@ -49,17 +48,74 @@ export const createSession = catchAsync(
       success_url: URL,
       cancel_url: URL,
       billing_address_collection: "auto",
+      metadata: {
+        userId: req.user as string,
+      },
     });
 
     return res.status(200).json({ url: session.url });
   }
 );
 
-export const webhook = catchAsync(async (req: Request, res: Response) => {
-  const signature = req.headers.get("stripe-Signature") as string;
-  const body = await req.text();
+export const webhook = catchAsync(
+  async (req: Request, res: Response<IResponse>) => {
+    const signature = req.headers.get("Stripe-Signature") as string;
+    const body = await req.text();
 
-  let event: Stripe.Event;
+    let event: Stripe.Event;
 
-  stripe.webhooks.constructEvent(body, signature, WEBHOOK_SECRET);
-});
+    event = stripe.webhooks.constructEvent(body, signature, WEBHOOK_SECRET);
+
+    const session = event.data.object as Stripe.Checkout.Session;
+
+    if (event.type === "checkout.session.completed") {
+      const subscription = await stripe.subscriptions.retrieve(
+        session.subscription as string
+      );
+
+      if (!session?.metadata?.userId)
+        throw new ErrorHandler("User id is required", 401);
+
+      await prisma.userSubscription.create({
+        data: {
+          userId: session.metadata.userId,
+          stripeCustomerId: subscription.customer as string,
+          stripePriceId: subscription.items.data[0].price.id,
+          stripeSubscriptionId: subscription.id,
+          stripeCurrentPeriodEnd: new Date(
+            subscription.current_period_end * 1000
+          ),
+        },
+      });
+
+      return res.status(201).json({
+        status: "success",
+        message: "Subscription succesfully created",
+      });
+    }
+
+    if (event.type === "invoice.payment_succeeded") {
+      const subscription = await stripe.subscriptions.retrieve(
+        session.subscription as string
+      );
+
+      await prisma.userSubscription.update({
+        where: {
+          stripeSubscriptionId: subscription.id,
+        },
+
+        data: {
+          stripePriceId: subscription.items.data[0].price.id,
+          stripeCurrentPeriodEnd: new Date(
+            subscription.current_period_end * 1000
+          ),
+        },
+      });
+
+      return res.status(200).json({
+        status: "success",
+        message: "Subscription succesfully updated",
+      });
+    }
+  }
+);

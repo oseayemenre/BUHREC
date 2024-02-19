@@ -8,6 +8,7 @@ import { ErrorHandler } from "./utils/errorHandler";
 import { errorMiddleware } from "./middleware/error.middleware";
 import { authRoute } from "./routes/auth.route";
 import { stripeRoute } from "./routes/stripe.route";
+import { commentRoute } from "./routes/comment.route";
 
 export const app: Express = express();
 
@@ -27,6 +28,7 @@ app.get("/", (req: Request, res: Response<IResponse>) => {
 
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/stripe", stripeRoute);
+app.use("/api/v1/comment", commentRoute);
 
 app.get("*", (req: Request, res: Response) => {
   throw new ErrorHandler("Route doesn't exist", 404);

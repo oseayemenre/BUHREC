@@ -84,8 +84,10 @@ model Comment {
   userId String @unique @db.ObjectId
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  documentId String   @unique @db.ObjectId
-  document   Document @relation(fields: [documentId], references: [id])
+  message String
+
+  documentId String?   @unique @db.ObjectId
+  document   Document? @relation(fields: [documentId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

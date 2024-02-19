@@ -15,7 +15,7 @@ export const createUser = async (data: TRegisterSchema) => {
   });
 };
 
-export const findUserById = async (id: string | undefined) => {
+export const findUserById = async (id: string) => {
   return await prisma.user.findUnique({
     where: {
       id,

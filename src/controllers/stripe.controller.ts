@@ -4,10 +4,16 @@ import { stripe } from "../utils/stripe";
 import { type Response } from "express";
 import { IRequestMiddleWare } from "../interfaces/requestMiddleWare.interface";
 import Stripe from "stripe";
-import { findUserSubscription } from "../services/stripe.services";
+import {
+  createSubscription,
+  findUserSubscription,
+  updateUserSubscription,
+} from "../services/stripe.services";
 import { ErrorHandler } from "../utils/errorHandler";
-import { prisma } from "../utils/prisma";
-import { IResponse } from "../interfaces/indexResponse.interface";
+import { IResponse } from "../interfaces/response.interface";
+import express from "express";
+
+type TRequest = Request & express.Request;
 
 export const createSession = catchAsync(
   async (req: IRequestMiddleWare, res: Response) => {
@@ -58,9 +64,9 @@ export const createSession = catchAsync(
 );
 
 export const webhook = catchAsync(
-  async (req: Request, res: Response<IResponse>) => {
-    const signature = req.headers.get("Stripe-Signature") as string;
-    const body = await req.text();
+  async (req: TRequest, res: Response<IResponse>) => {
+    const signature = req.headers["stripe-signature"] as string;
+    const body = req.body;
 
     let event: Stripe.Event;
 
@@ -76,16 +82,14 @@ export const webhook = catchAsync(
       if (!session?.metadata?.userId)
         throw new ErrorHandler("User id is required", 401);
 
-      await prisma.userSubscription.create({
-        data: {
-          userId: session.metadata.userId,
-          stripeCustomerId: subscription.customer as string,
-          stripePriceId: subscription.items.data[0].price.id,
-          stripeSubscriptionId: subscription.id,
-          stripeCurrentPeriodEnd: new Date(
-            subscription.current_period_end * 1000
-          ),
-        },
+      await createSubscription({
+        userId: session.metadata.userId,
+        stripeCustomerId: subscription.customer as string,
+        stripePriceId: subscription.items.data[0].price.id,
+        stripeSubscriptionId: subscription.id,
+        stripeCurrentPeriodEnd: new Date(
+          subscription.current_period_end * 1000
+        ),
       });
 
       return res.status(201).json({
@@ -99,17 +103,12 @@ export const webhook = catchAsync(
         session.subscription as string
       );
 
-      await prisma.userSubscription.update({
-        where: {
-          stripeSubscriptionId: subscription.id,
-        },
-
-        data: {
-          stripePriceId: subscription.items.data[0].price.id,
-          stripeCurrentPeriodEnd: new Date(
-            subscription.current_period_end * 1000
-          ),
-        },
+      await updateUserSubscription({
+        stripeSubscriptionId: subscription.id,
+        stripePriceId: subscription.items.data[0].price.id,
+        stripeCurrentPeriodEnd: new Date(
+          subscription.current_period_end * 1000
+        ),
       });
 
       return res.status(200).json({

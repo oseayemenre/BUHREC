@@ -1,7 +1,7 @@
-import { TSendMail } from "../interfaces/sendMail.interface";
+import { ISendMail } from "../interfaces/sendMail.interface";
 import { transporter } from "./nodemailer";
 
-export const sendmail = async (data: TSendMail) => {
+export const sendmail = async (data: ISendMail) => {
   await transporter.sendMail({
     from: '"BUHREC" <info@buhrec.com>',
     to: data.email,

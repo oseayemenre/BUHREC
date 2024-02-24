@@ -1,6 +1,6 @@
 import express, { type Express, type Request, type Response } from "express";
 import helmet from "helmet";
-import { type IResponse } from "./interfaces/indexResponse.interface";
+import { type IResponse } from "./interfaces/response.interface";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -13,6 +13,7 @@ import { commentRoute } from "./routes/comment.route";
 export const app: Express = express();
 
 app.use(cors());
+app.use("/api/v1/stripe/webhook", express.raw({ type: "*/*" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(morgan("dev"));

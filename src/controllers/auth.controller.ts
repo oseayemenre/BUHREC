@@ -12,16 +12,16 @@ import { ErrorHandler } from "../utils/errorHandler";
 import { generateToken } from "../utils/jwt";
 import { ACCESS_SECRET } from "../secret";
 import { type TLoginSchema } from "../schema/login.schema";
-import { type ICreateAccountResponse } from "../interfaces/createAccountResponse.interface";
+import { type ICreateAccountResponse } from "../interfaces/auth.interface";
 import { REFRESH_SECRET } from "../secret";
-import { type ILoginResponse } from "../interfaces/loginResponse.interface";
+import { type ILoginResponse } from "../interfaces/auth.interface";
 import bcrypt from "bcryptjs";
 import jwt, { type JwtPayload } from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 import { sendmail } from "../utils/sendMail";
 import { prisma } from "../utils/prisma";
-import { type IUpdateUserRequest } from "../interfaces/updateUserRequest.interface";
-import { type IAuthResponse } from "../interfaces/authResponse.interface";
+import { type IUpdateUserRequest } from "../interfaces/auth.interface";
+import { type IAuthResponse } from "../interfaces/auth.interface";
 
 export const createAccount = catchAsync(
   async (
@@ -40,8 +40,6 @@ export const createAccount = catchAsync(
     const randomPassword = uuidv4().split("-");
     const password = randomPassword[randomPassword.length - 1];
     const hashedPassword = await bcrypt.hash(password, 12);
-
-    console.log(hashedPassword, username);
 
     await sendmail({ name, email, username, password });
 

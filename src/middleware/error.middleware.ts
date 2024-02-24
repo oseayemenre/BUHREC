@@ -1,6 +1,6 @@
 import { type Request, type Response, type NextFunction } from "express";
 import { ErrorHandler } from "../utils/errorHandler";
-import { type IErrorMiddleWare } from "../interfaces/errorMiddleWare.interface";
+import { type IErrorMiddleWare } from "../interfaces/error.interface";
 import { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
 import {
   PrismaClientInitializationError,

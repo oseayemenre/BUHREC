@@ -1,4 +1,4 @@
-import { IErrorHandler } from "../interfaces/errorHandler.interface";
+import { IErrorHandler } from "../interfaces/error.interface";
 
 export class ErrorHandler extends Error implements IErrorHandler {
   status: number;

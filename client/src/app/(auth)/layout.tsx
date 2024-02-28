@@ -1,20 +1,22 @@
 import { type Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Poppins } from "next/font/google";
 import React from "react";
+import "@/app/globals.css";
 
 export const metadata: Metadata = {
   title: "BUHREC",
   description: "BUHREC",
 };
 
-export const inter = Inter({
+export const poppins = Poppins({
   subsets: ["latin"],
+  weight: ["400", "600"],
 });
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html>
-      <body className={inter.className}>{children}</body>
+      <body className={poppins.className}>{children}</body>
     </html>
   );
 };

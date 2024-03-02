@@ -1,7 +1,17 @@
 import React from "react";
 
-const Button = ({ style }: { style: string }) => {
-  return <button className={style}>Create Account</button>;
+interface IButton {
+  style: string;
+  text: string;
+  handleSubmit: () => void;
+}
+
+const Button = ({ style, text, handleSubmit }: IButton) => {
+  return (
+    <button className={style} onClick={handleSubmit}>
+      {text}
+    </button>
+  );
 };
 
 export default Button;

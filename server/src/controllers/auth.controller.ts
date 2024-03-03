@@ -29,22 +29,23 @@ export const createAccount = catchAsync(
     res: Response<ICreateAccountResponse>
   ) => {
     const body = req.body;
-    const { name, email } = body;
+    const { firstname, lastname, email } = body;
 
     const user = await findUserByEmail(email);
     if (user) throw new ErrorHandler("User already exists", 409);
 
     const randomdigits = Math.floor(1000 + Math.random() * 8999);
-    const username = `${name.split(/\s+/)[0].toLowerCase()}${randomdigits}`;
+    const username = `${lastname.split(/\s+/)[0].toLowerCase()}${randomdigits}`;
 
     const randomPassword = uuidv4().split("-");
     const password = randomPassword[randomPassword.length - 1];
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    await sendmail({ name, email, username, password });
+    await sendmail({ firstname, lastname, email, username, password });
 
     const data = await createUser({
-      name,
+      firstname,
+      lastname,
       email,
       username,
       password: hashedPassword,
@@ -193,7 +194,7 @@ export const deleteReviewerAccount = catchAsync(
 
     res.status(200).json({
       status: "success",
-      message: `${user.name} has been deleted`,
+      message: `${user.lastname} ${user.firstname} has been deleted`,
     });
   }
 );

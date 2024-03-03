@@ -1,7 +1,12 @@
 import z from "zod";
 
 export const registerSchema = z.object({
-  name: z
+  firstname: z
+    .string({
+      required_error: "Name cannot be empty",
+    })
+    .min(1),
+  lastname: z
     .string({
       required_error: "Name cannot be empty",
     })

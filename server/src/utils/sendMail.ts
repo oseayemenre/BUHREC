@@ -6,7 +6,7 @@ export const sendmail = async (data: ISendMail) => {
     from: '"BUHREC" <info@buhrec.com>',
     to: data.email,
     subject: "Your BUHREC Login Information",
-    html: `<p>Dear ${data.name},</p>
+    html: `<p>Dear ${data.lastname} ${data.firstname},</p>
           <p>We hope this message finds you well. As part of our ongoing efforts to provide a seamless user experience, we're sharing your login credentials for BUHREC:</p>
           <p>Username: <b>${data.username}</b></p>
           <p>Password: <b>${data.password}</b></p>
@@ -19,7 +19,7 @@ export const sendmail = async (data: ISendMail) => {
 };
 
 export const sendPaymentVerifiedMail = async (
-  data: Omit<ISendMail, "name" | "username" | "password">
+  data: Omit<ISendMail, "firstname" | "lastname" | "username" | "password">
 ) => {
   await transporter.sendMail({
     from: '"BUHREC" <info@buhrec.com>',

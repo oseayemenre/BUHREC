@@ -16,7 +16,8 @@ export const createComment = async (
 export const getComment = async (
   user: Omit<
     User,
-    | "name"
+    | "firstname"
+    | "lastname"
     | "username"
     | "email"
     | "password"

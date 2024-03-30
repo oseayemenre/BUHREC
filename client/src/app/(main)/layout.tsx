@@ -3,7 +3,6 @@ import { Roboto } from "next/font/google";
 import React from "react";
 import "@/app/globals.css";
 import Navbar from "@/components/navbar";
-import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
   title: "BUHREC",
@@ -18,7 +17,6 @@ export const roboto = Roboto({
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html>
-      <Toaster position="top-center" reverseOrder={false} />
       <body className={roboto.className}>
         <Navbar />
         {children}

@@ -12,7 +12,7 @@ import { validateSchema } from "../middleware/validateSchema.middleware";
 
 const router: Router = Router();
 
-router.use(privateRoute, userRole(["ADMIN", "REVIEWER"]));
+router.use(privateRoute, userRole("REVIEWER"));
 
 router
   .route("/")

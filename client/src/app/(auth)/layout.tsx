@@ -2,6 +2,7 @@ import { type Metadata } from "next";
 import { Poppins } from "next/font/google";
 import React from "react";
 import "@/app/globals.css";
+import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
   title: "BUHREC",
@@ -16,7 +17,10 @@ export const poppins = Poppins({
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html>
-      <body className={poppins.className}>{children}</body>
+      <body className={poppins.className}>
+        <Toaster position="top-center" reverseOrder={false} />
+        {children}
+      </body>
     </html>
   );
 };

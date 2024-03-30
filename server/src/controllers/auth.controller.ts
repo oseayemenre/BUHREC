@@ -3,9 +3,14 @@ import { type TRegisterSchema } from "../schema/register.schema";
 import { catchAsync } from "../utils/catchAsync";
 import {
   createUser,
+  deleteReviewer,
+  findAllAdmins,
   findUserByEmail,
   findUserById,
   findUserByUsername,
+  getAllResearchersByCourse,
+  getSubAdmins,
+  updateAvatar,
   updateUserPass,
 } from "../services/auth.services";
 import { ErrorHandler } from "../utils/errorHandler";
@@ -22,6 +27,9 @@ import { sendmail } from "../utils/sendMail";
 import { prisma } from "../utils/prisma";
 import { type IUpdateUserRequest } from "../interfaces/auth.interface";
 import { type IAuthResponse } from "../interfaces/auth.interface";
+import { cloudinary } from "../utils/cloudinary";
+import { Program, User } from "@prisma/client";
+import { IRequestMiddleWare } from "../interfaces/requestMiddleWare.interface";
 
 export const createAccount = catchAsync(
   async (
@@ -29,10 +37,24 @@ export const createAccount = catchAsync(
     res: Response<ICreateAccountResponse>
   ) => {
     const body = req.body;
-    const { firstname, lastname, email } = body;
+    const { firstname, lastname, email, role, level, program } = body;
 
     const user = await findUserByEmail(email);
     if (user) throw new ErrorHandler("User already exists", 409);
+
+    const findAdmin = await findAllAdmins();
+
+    if (findAdmin.length > 0)
+      throw new ErrorHandler("Admin already exists", 400);
+
+    const subAdmins = await getSubAdmins();
+
+    const subAdminCourse = subAdmins.findIndex(
+      (subAdmin) => subAdmin.program === program
+    );
+
+    if (subAdminCourse >= 0)
+      throw new ErrorHandler("A sub-admin for this course already exists", 400);
 
     const randomdigits = Math.floor(1000 + Math.random() * 8999);
     const username = `${lastname.split(/\s+/)[0].toLowerCase()}${randomdigits}`;
@@ -49,6 +71,9 @@ export const createAccount = catchAsync(
       email,
       username,
       password: hashedPassword,
+      role,
+      level,
+      program,
     });
 
     const accessToken = generateToken({ id: data.id }, ACCESS_SECRET);
@@ -174,27 +199,68 @@ export const logout = catchAsync(
 );
 
 export const deleteReviewerAccount = catchAsync(
-  async (req: Request<{ id: string }>, res: Response<IAuthResponse>) => {
-    const { id } = req.params;
+  async (req: IRequestMiddleWare, res: Response<IAuthResponse>) => {
+    const { id } = req.params as { id: string };
 
-    const user = await prisma.user.findUnique({
-      where: {
-        id,
-      },
-    });
+    const user = await findUserById(id as string);
 
     if (user?.role !== "REVIEWER")
       throw new ErrorHandler("User could not be deleted", 400);
 
-    await prisma.user.delete({
-      where: {
-        id,
-      },
-    });
+    await deleteReviewer(id);
 
     res.status(200).json({
       status: "success",
       message: `${user.lastname} ${user.firstname} has been deleted`,
+    });
+  }
+);
+
+export const updateProfilePicture = catchAsync(
+  async (req: IUpdateUserRequest, res: Response<{ user: User }>) => {
+    const { image } = req.body as { image: string };
+
+    const avatar = await cloudinary.uploader.upload(image, {
+      folder: "buhrec",
+    });
+
+    const user = await updateAvatar({
+      id: req.user as string,
+      avatar: avatar.secure_url,
+    });
+
+    res.status(200).json({
+      user,
+    });
+  }
+);
+
+export const getAllSubAdmins = catchAsync(
+  async (
+    req: Request,
+    res: Response<{ status: string; sub_admins: User[] }>
+  ) => {
+    const sub_admins = await getSubAdmins();
+
+    res.status(200).json({
+      status: "success",
+      sub_admins,
+    });
+  }
+);
+
+export const getAllResearchers = catchAsync(
+  async (
+    req: Request<{ program: Program }>,
+    res: Response<{ status: string; researchers: User[] }>
+  ) => {
+    const { program } = req.params;
+
+    const researchers = await getAllResearchersByCourse(program);
+
+    res.status(200).json({
+      status: "success",
+      researchers,
     });
   }
 );

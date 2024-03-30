@@ -26,6 +26,7 @@ export const getComment = async (
     | "program"
     | "createdAt"
     | "updatedAt"
+    | "avatar"
   >
 ) => {
   return await prisma.user.findUnique({

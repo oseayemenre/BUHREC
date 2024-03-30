@@ -2,11 +2,12 @@
 
 import Image from "next/image";
 import Button from "@/components/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 const registerSchema = z.object({
   firstname: z
@@ -40,11 +41,12 @@ const loginSchema = z.object({
     .min(1),
 });
 
-export type TRegisterSchema = z.infer<typeof registerSchema>;
-export type TLoginSchema = z.infer<typeof loginSchema>;
+type TRegisterSchema = z.infer<typeof registerSchema>;
+type TLoginSchema = z.infer<typeof loginSchema>;
 
 const App = () => {
   const [variant, setVariant] = useState(false);
+  const router = useRouter();
 
   const form1 = useForm<TRegisterSchema>({
     defaultValues: {
@@ -65,7 +67,7 @@ const App = () => {
     resolver: zodResolver(loginSchema),
   });
 
-  const handleSubmit = async (values: TRegisterSchema) => {
+  const handleSubmit = async (values: TRegisterSchema): Promise<void> => {
     await fetch("http://localhost:8000/api/v1/auth/create-account", {
       method: "POST",
       headers: {
@@ -77,10 +79,12 @@ const App = () => {
         email: values.email,
       }),
     });
+
+    setVariant(true);
   };
 
-  const loginSubmit = async (values: TLoginSchema) => {
-    await fetch("http://localhost:8000/api/v1/auth/login", {
+  const loginSubmit = async (values: TLoginSchema): Promise<void | string> => {
+    const res = await fetch("http://localhost:8000/api/v1/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -90,7 +94,22 @@ const App = () => {
         password: values.password,
       }),
     });
+    if (!res.ok) return toast.error("Invalid credentials");
+
+    return router.push("/");
   };
+
+  useEffect(() => {
+    if (form1.formState.errors.email) {
+      toast.error("User cannot be created");
+    }
+  }, [form1.formState.errors.email]);
+
+  useEffect(() => {
+    if (form2.formState.errors.username || form2.formState.errors.password) {
+      toast.error("Email or password cannot be empty");
+    }
+  }, [form2.formState.errors.username, form2.formState.errors.password]);
 
   return (
     <main className="bg-[url('/background-image.png')] h-screen bg-cover flex items-center justify-center">

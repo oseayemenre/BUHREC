@@ -9,13 +9,14 @@ import { errorMiddleware } from "./middleware/error.middleware";
 import { authRoute } from "./routes/auth.route";
 import { stripeRoute } from "./routes/stripe.route";
 import { commentRoute } from "./routes/comment.route";
+import { documentRoute } from "./routes/document.route";
 
 export const app: Express = express();
 
 app.use(cors());
 app.use("/api/v1/stripe/webhook", express.raw({ type: "*/*" }));
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
 app.use(morgan("dev"));
 app.use(cookieParser());
 app.use(helmet());
@@ -30,6 +31,7 @@ app.get("/", (req: Request, res: Response<IResponse>) => {
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/stripe", stripeRoute);
 app.use("/api/v1/comment", commentRoute);
+app.use("/api/v1/document", documentRoute);
 
 app.get("*", (req: Request, res: Response) => {
   throw new ErrorHandler("Route doesn't exist", 404);

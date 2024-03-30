@@ -11,6 +11,7 @@ enum Role {
   RESEARCHER
   REVIEWER
   ADMIN
+  SUB_ADMIN
 }
 
 enum Level {
@@ -29,20 +30,25 @@ enum Program {
   HUMANITIES
 }
 
+enum Status {
+  PENDING
+  APPROVED
+}
+
 model User {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
   firstname String
   lastname  String
-  username  String @unique
-  email     String @unique
-  password  String @unique
-
-  role    Role    @default(RESEARCHER)
-  level   Level   @default(UNDERGRADUATE)
-  program Program @default(COMPUTER_SCIENCE)
+  username  String  @unique
+  email     String  @unique
+  password  String  @unique
+  avatar    String?
+  role      Role
+  level     Level
+  program   Program
 
   userSubScription UserSubscription?
-  document         Document?
+  document         Document[]
   comment          Comment[]
 
   createdAt DateTime @default(now())
@@ -67,8 +73,9 @@ model UserSubscription {
 model Document {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  name   String
-  status Boolean
+  name        String
+  status      Status @default(PENDING)
+  documentUrl String
 
   userId String @unique @db.ObjectId
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)

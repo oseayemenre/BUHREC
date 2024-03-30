@@ -2,7 +2,10 @@ import { Document, Program, Status, User } from "@prisma/client";
 import { prisma } from "../utils/prisma";
 
 export const sendDocument = async (
-  data: Omit<Document, "id" | "status" | "createdAt" | "updatedAt">
+  data: Omit<
+    Document,
+    "id" | "status" | "createdAt" | "updatedAt" | "reviewerId" | "dateAssigned"
+  >
 ): Promise<Document> => {
   return await prisma.document.create({
     data: {
@@ -77,23 +80,38 @@ export const findReviewer = async (id: string): Promise<User | null> => {
   });
 };
 
-// export const addDocument = async(reviewerId:string, documentId: string): Promise<User> => {
+export const addDocument = async (
+  reviewerId: string,
+  documentId: string
+): Promise<Document> => {
+  return await prisma.document.update({
+    where: {
+      id: documentId,
+    },
 
-//   // const document = await prisma.document.findMany({
-//   //   where: {
-//   //     id: documentId
-//   //   }
-//   // })
+    data: {
+      reviewerId,
+      dateAssigned: new Date(),
+    },
+  });
+};
 
-//   // return await prisma.user.update({
-//   //   where: {
-//   //     id: reviewerId
-//   //   },
+export const removeReviewer = async (id: string): Promise<Document> => {
+  return await prisma.document.update({
+    where: {
+      id,
+    },
 
-//   //   data: {
-//   //     document: {
+    data: {
+      reviewerId: "",
+    },
+  });
+};
 
-//   //     }
-//   //   }
-//   // })
-// }
+export const getDocumentById = async (id: string): Promise<Document | null> => {
+  return await prisma.document.findUnique({
+    where: {
+      id,
+    },
+  });
+};

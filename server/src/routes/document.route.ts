@@ -6,7 +6,7 @@ import {
   assignDocument,
   getDocument,
   getDocuments,
-  removeDocument,
+  unassignReviewer,
   uploadDocument,
 } from "../controllers/document.controller";
 import { Role } from "@prisma/client";
@@ -20,7 +20,12 @@ router.post(
   uploadDocument
 );
 
-router.get("/:program", privateRoute, userRole(Role.SUB_ADMIN), getDocuments);
+router.get(
+  "/program/:program",
+  privateRoute,
+  userRole(Role.SUB_ADMIN),
+  getDocuments
+);
 
 router.get(
   "/single-document",
@@ -36,7 +41,7 @@ router.patch(
   approveDocument
 );
 
-router.post(
+router.patch(
   "/assign-document/:documentId/:reviewerId",
   privateRoute,
   userRole(Role.SUB_ADMIN),
@@ -44,10 +49,10 @@ router.post(
 );
 
 router.delete(
-  "/remove-document",
+  "/:documentId",
   privateRoute,
-  userRole(Role.ADMIN),
-  removeDocument
+  userRole(Role.SUB_ADMIN),
+  unassignReviewer
 );
 
 export { router as documentRoute };

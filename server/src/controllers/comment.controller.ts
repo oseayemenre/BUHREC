@@ -15,17 +15,18 @@ import {
 import { type TCommentSchema } from "../schema/comment.schema";
 import { type IResponse } from "../interfaces/response.interface";
 import { ErrorHandler } from "../utils/errorHandler";
-import { Comment } from "@prisma/client";
 
 export const getUserComment = catchAsync(
   async (req: IRequestMiddleWare, res: Response<IGetComment | null>) => {
+    const { documentId } = req.params as { documentId: string };
     const comments = await getComment({
       id: req.user as string,
+      documentId,
     });
 
     res.status(200).json({
       status: "success",
-      comments: comments?.comment as Comment[],
+      comments: comments,
     });
   }
 );
@@ -34,8 +35,9 @@ export const postComment = catchAsync(
   async (req: IRequestMiddleWare, res: Response<IResponse>) => {
     const body: TCommentSchema = req.body;
     const { message } = body;
+    const { documentId } = req.params as { documentId: string };
 
-    await createComment({ userId: req.user as string, message });
+    await createComment({ userId: req.user as string, message, documentId });
 
     return res.status(201).json({
       status: "success",

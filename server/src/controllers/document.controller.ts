@@ -5,13 +5,15 @@ import { IRequestMiddleWare } from "../interfaces/requestMiddleWare.interface";
 import { ErrorHandler } from "../utils/errorHandler";
 import { Document, Program } from "@prisma/client";
 import {
-  // addDocument,
+  addDocument,
   approvedocument,
   findDocument,
   findReviewer,
   getAllDocuments,
+  removeReviewer,
   getUserDocument,
   sendDocument,
+  getDocumentById,
 } from "../services/document.services";
 
 export const uploadDocument = catchAsync(
@@ -104,10 +106,40 @@ export const assignDocument = catchAsync(
         400
       );
 
-    // const document = addDocument(reviewerId, documentId);
+    const document = await addDocument(reviewerId, documentId);
+
+    res.status(200).json({
+      status: "success",
+      document,
+    });
   }
 );
 
-export const removeDocument = catchAsync(
-  async (req: Request, res: Response) => {}
+export const unassignReviewer = catchAsync(
+  async (
+    req: Request<{ documentId: string }>,
+    res: Response<{ status: string; document: Document }>
+  ) => {
+    const { documentId } = req.params;
+
+    const doc = (await getDocumentById(documentId)) as Document;
+
+    if (
+      new Date() >
+      new Date(
+        (doc.dateAssigned as Date).setDate(
+          (doc.dateAssigned as Date).getDate() + 14
+        )
+      )
+    ) {
+      const document = await removeReviewer(documentId);
+
+      return res.status(200).json({
+        status: "success",
+        document,
+      });
+    }
+
+    throw new ErrorHandler("Reviewer cannot be removed yet", 400);
+  }
 );

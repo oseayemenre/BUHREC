@@ -1,40 +1,23 @@
 import { type Comment, type User } from "@prisma/client";
 import { prisma } from "../utils/prisma";
 
-// Reminder to add documentId later
 export const createComment = async (
-  comment: Omit<Comment, "id" | "documentId" | "createdAt" | "updatedAt">
+  comment: Omit<Comment, "id" | "createdAt" | "updatedAt">
 ) => {
   return await prisma.comment.create({
     data: {
       userId: comment.userId,
       message: comment.message,
+      documentId: comment.documentId,
     },
   });
 };
 
-export const getComment = async (
-  user: Omit<
-    User,
-    | "firstname"
-    | "lastname"
-    | "username"
-    | "email"
-    | "password"
-    | "role"
-    | "level"
-    | "program"
-    | "createdAt"
-    | "updatedAt"
-    | "avatar"
-  >
-) => {
-  return await prisma.user.findUnique({
+export const getComment = async (user: { id: string; documentId: string }) => {
+  return await prisma.comment.findMany({
     where: {
-      id: user.id,
-    },
-    include: {
-      comment: true,
+      userId: user.id,
+      documentId: user.documentId,
     },
   });
 };

@@ -14,10 +14,9 @@ const router: Router = Router();
 
 router.use(privateRoute, userRole("REVIEWER"));
 
-router
-  .route("/")
-  .get(getUserComment)
-  .post(validateSchema(commentSchema), postComment);
+router.get("/", getUserComment);
+
+router.post("/:documentId", validateSchema(commentSchema), postComment);
 
 router.patch("/:id", validateSchema(commentSchema), updateComment);
 

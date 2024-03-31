@@ -18,7 +18,7 @@ export const userRole =
 
     return next(
       new ErrorHandler(
-        `${role?.lastname} ${role?.firstname}doesn't have access to this route`,
+        `${role?.lastname} ${role?.firstname} doesn't have access to this route`,
         404
       )
     );

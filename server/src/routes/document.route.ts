@@ -6,6 +6,7 @@ import {
   assignDocument,
   getDocument,
   getDocuments,
+  reviewerGetDocument,
   unassignReviewer,
   uploadDocument,
 } from "../controllers/document.controller";
@@ -27,11 +28,13 @@ router.get(
   getDocuments
 );
 
+router.get("/", privateRoute, userRole(Role.RESEARCHER), getDocument);
+
 router.get(
-  "/single-document",
+  "/researcher/:id",
   privateRoute,
-  userRole([Role.REVIEWER]),
-  getDocument
+  userRole([Role.REVIEWER, Role.SUB_ADMIN]),
+  reviewerGetDocument
 );
 
 router.patch(

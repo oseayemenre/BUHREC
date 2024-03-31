@@ -14,6 +14,7 @@ import {
   getUserDocument,
   sendDocument,
   getDocumentById,
+  reviewerGetUserDocument,
 } from "../services/document.services";
 
 export const uploadDocument = catchAsync(
@@ -72,6 +73,21 @@ export const getDocument = catchAsync(
     res.status(200).json({
       status: "success",
       document: document?.document as Document[],
+    });
+  }
+);
+
+export const reviewerGetDocument = catchAsync(
+  async (
+    req: IRequestMiddleWare,
+    res: Response<{ status: string; document: Document }>
+  ) => {
+    const { id } = req.params as { id: string };
+    const document = await reviewerGetUserDocument({ id });
+
+    res.status(200).json({
+      status: "success",
+      document: document as Document,
     });
   }
 );

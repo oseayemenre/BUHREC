@@ -4,7 +4,8 @@ import {
   createNewAccessToken,
   deleteAccount,
   deleteReviewerAccount,
-  getAllResearchers,
+  deleteSubAdminAccount,
+  getAllReviewers,
   getAllSubAdmins,
   login,
   logout,
@@ -32,10 +33,10 @@ router.post("/login", publicRoute, validateSchema(loginSchema), login);
 router.get("/sub-admins", privateRoute, userRole(Role.ADMIN), getAllSubAdmins);
 
 router.get(
-  "/researchers/:program",
+  "/reviewers/:program",
   privateRoute,
-  userRole(Role.REVIEWER),
-  getAllResearchers
+  userRole(Role.SUB_ADMIN),
+  getAllReviewers
 );
 
 router.get("/token", publicRoute, createNewAccessToken);
@@ -51,6 +52,13 @@ router.delete(
   privateRoute,
   userRole(Role.SUB_ADMIN),
   deleteReviewerAccount
+);
+
+router.delete(
+  "/delete-sub-admin/:id",
+  privateRoute,
+  userRole(Role.ADMIN),
+  deleteSubAdminAccount
 );
 
 router.get("/logout", privateRoute, logout);

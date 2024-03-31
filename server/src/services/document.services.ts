@@ -25,6 +25,7 @@ export const getAllDocuments = async (
 > => {
   return await prisma.user.findMany({
     where: {
+      role: "RESEARCHER",
       program,
     },
 
@@ -56,6 +57,16 @@ export const getUserDocument = async (data: {
 
     select: {
       document: true,
+    },
+  });
+};
+
+export const reviewerGetUserDocument = async (data: {
+  id: string;
+}): Promise<Document | null> => {
+  return await prisma.document.findUnique({
+    where: {
+      id: data.id,
     },
   });
 };
@@ -103,7 +114,8 @@ export const removeReviewer = async (id: string): Promise<Document> => {
     },
 
     data: {
-      reviewerId: "",
+      reviewerId: null,
+      dateAssigned: null,
     },
   });
 };

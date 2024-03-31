@@ -50,8 +50,8 @@ export const createSession = catchAsync(
         },
       ],
       mode: "subscription",
-      success_url: "http://localhost:8000",
-      cancel_url: "http://localhost:8000",
+      success_url: URL,
+      cancel_url: URL,
       billing_address_collection: "auto",
       metadata: {
         userId: req.user as string,

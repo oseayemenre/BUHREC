@@ -49,7 +49,7 @@ export const updateUserPass = async (
   });
 };
 
-export const deleteReviewer = async (id: string): Promise<User> => {
+export const deleteReviewerOrSubAdmin = async (id: string): Promise<User> => {
   return await prisma.user.delete({
     where: {
       id,
@@ -83,12 +83,12 @@ export const getSubAdmins = async (): Promise<User[]> => {
   });
 };
 
-export const getAllResearchersByCourse = async (
+export const getAllReviewersByCourse = async (
   program: Program
 ): Promise<User[]> => {
   return await prisma.user.findMany({
     where: {
-      role: "RESEARCHER",
+      role: "REVIEWER",
       program,
     },
   });

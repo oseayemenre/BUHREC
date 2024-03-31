@@ -3,12 +3,12 @@ import { type TRegisterSchema } from "../schema/register.schema";
 import { catchAsync } from "../utils/catchAsync";
 import {
   createUser,
-  deleteReviewer,
+  deleteReviewerOrSubAdmin,
   findAllAdmins,
   findUserByEmail,
   findUserById,
   findUserByUsername,
-  getAllResearchersByCourse,
+  getAllReviewersByCourse,
   getSubAdmins,
   updateAvatar,
   updateUserPass,
@@ -44,7 +44,7 @@ export const createAccount = catchAsync(
 
     const findAdmin = await findAllAdmins();
 
-    if (findAdmin.length > 0)
+    if (role === "ADMIN" && findAdmin.length > 0)
       throw new ErrorHandler("Admin already exists", 400);
 
     const subAdmins = await getSubAdmins();
@@ -53,7 +53,7 @@ export const createAccount = catchAsync(
       (subAdmin) => subAdmin.program === program
     );
 
-    if (subAdminCourse >= 0)
+    if (role === "SUB_ADMIN" && subAdminCourse >= 0)
       throw new ErrorHandler("A sub-admin for this course already exists", 400);
 
     const randomdigits = Math.floor(1000 + Math.random() * 8999);
@@ -207,7 +207,7 @@ export const deleteReviewerAccount = catchAsync(
     if (user?.role !== "REVIEWER")
       throw new ErrorHandler("User could not be deleted", 400);
 
-    await deleteReviewer(id);
+    await deleteReviewerOrSubAdmin(id);
 
     res.status(200).json({
       status: "success",
@@ -249,18 +249,36 @@ export const getAllSubAdmins = catchAsync(
   }
 );
 
-export const getAllResearchers = catchAsync(
+export const getAllReviewers = catchAsync(
   async (
     req: Request<{ program: Program }>,
     res: Response<{ status: string; researchers: User[] }>
   ) => {
     const { program } = req.params;
 
-    const researchers = await getAllResearchersByCourse(program);
+    const researchers = await getAllReviewersByCourse(program);
 
     res.status(200).json({
       status: "success",
       researchers,
+    });
+  }
+);
+
+export const deleteSubAdminAccount = catchAsync(
+  async (req: Request, res: Response) => {
+    const { id } = req.params as { id: string };
+
+    const user = await findUserById(id as string);
+
+    if (user?.role !== "SUB_ADMIN")
+      throw new ErrorHandler("User could not be deleted", 400);
+
+    await deleteReviewerOrSubAdmin(id);
+
+    res.status(200).json({
+      status: "success",
+      message: `${user.lastname} ${user.firstname} has been deleted`,
     });
   }
 );

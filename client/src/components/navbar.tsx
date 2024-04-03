@@ -36,10 +36,13 @@ const Navbar = () => {
   const [active, setActive] = useState<null | number>(null);
 
   return (
-    <nav className="px-20 flex justify-between items-center mb-[90.27px]">
+    <nav className="px-20 flex justify-between items-center mb-[90.27px] py-12">
       <div className="flex gap-x-12 items-center font-[500]">
         <Link href="/">
-          <Image src="/bu-logo-1.jpg" width={150} height={150} alt="" />
+          <h2 className=" font-[800] text-[20px]">
+            <span className="text-[#4880FF]">BU</span>
+            HREC
+          </h2>
         </Link>
 
         {nav_items.map((items: Tnav_items, index: number) => {
@@ -48,11 +51,11 @@ const Navbar = () => {
               key={index}
               onMouseOver={() => setActive(index)}
               onMouseOut={() => setActive(null)}
-              className="hover:text-[#EA580C] cursor-pointer font-[500] hover:duration-150 hover:ease tracking-[0.5px]"
+              className="hover:text-[#4880FF] cursor-pointer font-[500] hover:duration-150 hover:ease tracking-[0.5px]"
             >
               <Link href={items.link}>{items.label}</Link>
               {active === index && (
-                <div className="border-b-[#EA580C] border-b-[2px] w-full relative top-2 duration-150 ease" />
+                <div className="border-b-[#4880FF] border-b-[2px] w-full relative top-2 duration-150 ease" />
               )}
             </div>
           );
@@ -60,7 +63,7 @@ const Navbar = () => {
       </div>
 
       <Button
-        style="w-[153px] h-[48px] rounded-[8px] font-[500] text-black text-[16px] border-black border-[3px] hover:text-[#EA580C] hover:border-[#EA580C] tracking-[0.5px]"
+        style="w-[153px] h-[48px] rounded-[8px] font-[500] text-black text-[16px] border-black border-[3px] hover:text-[#4880FF] hover:border-[#4880FF] tracking-[0.5px]"
         text="Sign Up Now"
         handleSubmit={() => router.push("/auth")}
       />

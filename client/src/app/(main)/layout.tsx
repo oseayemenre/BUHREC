@@ -1,5 +1,5 @@
 import { type Metadata } from "next";
-import { Roboto } from "next/font/google";
+import { Nunito_Sans } from "next/font/google";
 import React from "react";
 import "@/app/globals.css";
 import Navbar from "@/components/navbar";
@@ -9,19 +9,17 @@ export const metadata: Metadata = {
   description: "BUHREC",
 };
 
-export const roboto = Roboto({
+export const nunito_sans = Nunito_Sans({
   subsets: ["latin"],
-  weight: ["100", "300", "400", "500", "700", "900"],
+  weight: ["300", "400", "500", "700", "900"],
 });
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <html>
-      <body className={roboto.className}>
-        <Navbar />
-        {children}
-      </body>
-    </html>
+    <main className={nunito_sans.className}>
+      <Navbar />
+      {children}
+    </main>
   );
 };
 

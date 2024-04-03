@@ -1,3 +1,4 @@
+import { User } from "@prisma/client";
 import { type Request } from "express";
 
 export interface IAuthResponse {
@@ -17,6 +18,7 @@ export interface ILoginResponse {
   message: string;
   accessToken: string;
   refreshToken: string;
+  user: User;
 }
 
 export interface IUpdateUserRequest extends Request {

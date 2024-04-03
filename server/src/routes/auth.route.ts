@@ -11,6 +11,7 @@ import {
   logout,
   updateProfilePicture,
   updateUserPassword,
+  getProfile,
 } from "../controllers/auth.controller";
 import { validateSchema } from "../middleware/validateSchema.middleware";
 import { registerSchema } from "../schema/register.schema";
@@ -27,6 +28,8 @@ router.post(
   validateSchema(registerSchema),
   createAccount
 );
+
+router.get("/profile", privateRoute, getProfile);
 
 router.post("/login", publicRoute, validateSchema(loginSchema), login);
 

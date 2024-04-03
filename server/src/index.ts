@@ -13,7 +13,12 @@ import { documentRoute } from "./routes/document.route";
 
 export const app: Express = express();
 
-app.use(cors());
+app.use(
+  cors({
+    credentials: true,
+    origin: ["http://localhost:3000"],
+  })
+);
 app.use("/api/v1/stripe/webhook", express.raw({ type: "*/*" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: "50mb" }));

@@ -111,12 +111,13 @@ export const login = catchAsync(
       message: "Access granted",
       accessToken,
       refreshToken,
+      user: user as User,
     });
   }
 );
 
 export const createNewAccessToken = catchAsync(
-  async (req: Request, res: Response<ILoginResponse>) => {
+  async (req: Request, res: Response<Omit<ILoginResponse, "user">>) => {
     const token: string = req.cookies.refresh_token;
     if (!token) throw new ErrorHandler("Token not found", 404);
     const decoded = jwt.verify(token, REFRESH_SECRET) as JwtPayload;
@@ -282,3 +283,15 @@ export const deleteSubAdminAccount = catchAsync(
     });
   }
 );
+
+export const getProfile = async (
+  req: IRequestMiddleWare,
+  res: Response<{ status: string; user: User }>
+) => {
+  const user = await findUserById(req.user as string);
+
+  res.status(200).json({
+    status: "success",
+    user: user as User,
+  });
+};

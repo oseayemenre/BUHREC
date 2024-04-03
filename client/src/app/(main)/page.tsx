@@ -3,21 +3,17 @@
 import Button from "@/components/button";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useAuthContext } from "@/context/auth.context";
 
 const Home = () => {
   const router = useRouter();
+
+  const { user, setUser } = useAuthContext();
 
   return (
     <main>
       <section className="px-20 flex gap-x-20 items-center">
         <div className="w-1/2 flex flex-col gap-y-8 relative">
-          <Image
-            src="/heading-vector.png"
-            width={196}
-            height={23}
-            alt=""
-            className="absolute -z-10 top-[62px]"
-          />
           <h1 className="font-[900] text-[72px] leading-[80px]">
             Review Projects easily
           </h1>
@@ -28,7 +24,7 @@ const Home = () => {
             insightful evaluations of documents and projects.
           </p>
           <Button
-            style="w-[239px] h-[64px] bg-[#EA580C] rounded-[8px] font-[700] text-white text-[24px] hover:text-[#EA580C] hover:bg-white hover:border-[#EA580C] hover:border-[3px] tracking-[0.5px]"
+            style="w-[239px] h-[64px] bg-[#4880FF] rounded-[8px] font-[700] text-white text-[24px] hover:text-[#4880FF] hover:bg-white hover:border-[#4880FF] hover:border-[3px] tracking-[0.5px]"
             text="Sign Up Now"
             handleSubmit={() => router.push("/auth")}
           />

@@ -1,10 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Button from "./button";
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 const Navbar = () => {
   const nav_items = [
@@ -24,14 +23,12 @@ const Navbar = () => {
       label: "Submit a proposal",
       link: "/auth",
     },
-    {
-      label: "Main menu",
-      link: "/main-menu",
-    },
   ] as const;
   type Tnav_items = (typeof nav_items)[number];
 
   const router = useRouter();
+
+  const pathname = usePathname();
 
   const [active, setActive] = useState<null | number>(null);
 
@@ -51,10 +48,12 @@ const Navbar = () => {
               key={index}
               onMouseOver={() => setActive(index)}
               onMouseOut={() => setActive(null)}
-              className="hover:text-[#4880FF] cursor-pointer font-[500] hover:duration-150 hover:ease tracking-[0.5px]"
+              className={`hover:text-[#4880FF] cursor-pointer font-[500] hover:duration-150 hover:ease tracking-[0.5px] ${
+                pathname === items.link ? "text-[#4880FF]" : "text-black"
+              }`}
             >
               <Link href={items.link}>{items.label}</Link>
-              {active === index && (
+              {(active === index || pathname === items.link) && (
                 <div className="border-b-[#4880FF] border-b-[2px] w-full relative top-2 duration-150 ease" />
               )}
             </div>

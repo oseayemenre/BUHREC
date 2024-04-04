@@ -7,11 +7,9 @@ import { FaBell } from "react-icons/fa";
 import Image from "next/image";
 import { useAuthContext } from "@/context/auth.context";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { FaSpinner } from "react-icons/fa6";
+import { useEffect, useState } from "react";
 
 const Dashboard = () => {
-  const { user } = useAuthContext();
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -19,33 +17,12 @@ const Dashboard = () => {
       credentials: "include",
     });
 
-    return router.push("/auth");
+    router.push("/");
   };
 
-  if (!user)
-    return (
-      <main className="flex justify-center items-center h-screen gap-x-6">
-        <h2 className=" font-[800] text-[80px]">
-          <span className="text-[#4880FF]">BU</span>
-          HREC
-        </h2>
-        <motion.div
-          animate={{
-            rotate: 360,
-            transition: {
-              repeat: Infinity,
-              duration: 1.5,
-            },
-          }}
-        >
-          <FaSpinner size={80} color="#4880FF" />
-        </motion.div>
-      </main>
-    );
+  const { user } = useAuthContext();
 
-  if (user?.message === "Token not found") return router.push("/auth");
-
-  console.log(user);
+  if (!user || user?.message === "Token not found") return router.push("/auth");
 
   return (
     <main className="bg-[#F5F6FA] h-screen flex text-[14px]">
@@ -77,7 +54,7 @@ const Dashboard = () => {
           </div>
           <div className="flex items-center gap-x-6">
             <FaBell size={29} color="#4880FF" />
-            {user?.user?.avatar ? (
+            {user?.user.avatar ? (
               <Image
                 src={user?.user.avatar as string}
                 width={35}
@@ -93,7 +70,7 @@ const Dashboard = () => {
 
             <div>
               <p className="font-[600]">
-                {user?.user?.lastname} {user?.user?.firstname}
+                {user?.user.lastname} {user?.user.firstname}
               </p>
               <p className="font-[500] text-[12px]">{user?.user?.role}</p>
             </div>
@@ -102,7 +79,7 @@ const Dashboard = () => {
 
         <div className="mx-[30px]">
           <h1 className="mt-[30px] text-[32px] font-[600] mb-[23px]">
-            {user?.user?.program}
+            {user?.user.program}
           </h1>
 
           <div className="w-[685px] h-[70px] bg-white rounded-[10px] flex border-[1px] border-[#D5D5D5] mb-6">

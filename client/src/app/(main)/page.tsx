@@ -30,7 +30,13 @@ const Home = () => {
           />
         </div>
 
-        <Image src="/hero-image.svg" width={624.6} height={544.63} alt="" />
+        <Image
+          src="/hero-image.jpg"
+          width={624.6}
+          height={622.52}
+          alt=""
+          priority
+        />
       </section>
     </main>
   );

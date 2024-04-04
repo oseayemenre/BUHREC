@@ -176,7 +176,7 @@ const App = () => {
     if (res.status === 500) return toast.error("Oops! Something went wrong");
 
     //@ts-ignore
-    setUser(data.data);
+    setUser(data);
 
     return router.push("/dashboard");
   };
@@ -198,7 +198,7 @@ const App = () => {
     const data = (await res.json()) as ILoginData;
 
     //@ts-ignore
-    setUser(data.user);
+    setUser(data);
 
     return router.push("/dashboard");
   };

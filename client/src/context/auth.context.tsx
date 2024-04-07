@@ -14,8 +14,8 @@ import { useProfile } from "@/hooks/useProfile";
 type TChildren = React.ReactNode;
 
 interface IUser {
-  user?: ILoginDatadata & ILoginData;
-  setUser: Dispatch<SetStateAction<ILoginDatadata & ILoginData>>;
+  user?: (ILoginDatadata & ILoginData) | null;
+  setUser: Dispatch<SetStateAction<(ILoginDatadata & ILoginData) | null>>;
 }
 
 const AuthContext = createContext<IUser | null>(null);
@@ -32,7 +32,7 @@ export const useAuthContext = () => {
 const AuthContextProvider = ({ children }: { children: TChildren }) => {
   const { profile } = useProfile();
 
-  const [user, setUser] = useState<ILoginData & ILoginDatadata>(
+  const [user, setUser] = useState<(ILoginData & ILoginDatadata) | null>(
     profile as ILoginData & ILoginDatadata
   );
 

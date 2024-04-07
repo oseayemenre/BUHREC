@@ -24,8 +24,11 @@ export const uploadDocument = catchAsync(
   ) => {
     const { document, name } = req.body as { document: string; name: string };
 
-    if (!document.startsWith("data:application/pdf"))
-      throw new ErrorHandler("This type of file cannot be validated", 400);
+    // if (
+    //   !document.startsWith("data:application/pdf") ||
+    //   !document.startsWith("data:@file/pdf")
+    // )
+    //   throw new ErrorHandler("This type of file cannot be validated", 400);
 
     const documentUrl = await cloudinary.uploader.upload(document, {
       resource_type: "raw",
@@ -34,7 +37,7 @@ export const uploadDocument = catchAsync(
 
     const checkdocument = await findDocument({ userId: req.user as string });
 
-    if (checkdocument?.status === "PENDING")
+    if (checkdocument && checkdocument?.status === "PENDING")
       throw new ErrorHandler("A document has already been submitted", 409);
 
     const file = await sendDocument({

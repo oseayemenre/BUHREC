@@ -151,6 +151,7 @@ export const updateUserPassword = catchAsync(
     const body: IUpdateUserRequest = req.body;
     const { password } = body;
 
+    console.log(password);
     const hashPassword = await bcrypt.hash(password, 12);
 
     await updateUserPass(user.password, hashPassword);

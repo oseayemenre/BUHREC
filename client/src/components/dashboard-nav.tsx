@@ -6,7 +6,7 @@ import { useRouter, usePathname } from "next/navigation";
 
 const DashboardNav = () => {
   const router = useRouter();
-  const { setUser } = useAuthContext();
+  const { user, setUser } = useAuthContext();
 
   const handleLogout = async (): Promise<void> => {
     await fetch("http://localhost:8000/api/v1/auth/logout", {
@@ -32,7 +32,7 @@ const DashboardNav = () => {
           path === "/dashboard" ? "bg-[#4880FF] text-white" : "text-black"
         } rounded-[6px] cursor-pointer mb-12`}
       >
-        Dashboard
+        {user?.user.role === "RESEARCHER" ? "Upload document" : "Dashboard"}
       </Link>
 
       <Link

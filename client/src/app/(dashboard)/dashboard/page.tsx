@@ -8,10 +8,15 @@ import { FaBell } from "react-icons/fa";
 import Image from "next/image";
 import { useAuthContext } from "@/context/auth.context";
 import { useRouter } from "next/navigation";
-import { useState, useEffect, ChangeEvent } from "react";
+import { useState, useEffect, ChangeEvent, useRef } from "react";
 import { FaSpinner } from "react-icons/fa6";
 import { ILoginDatadata } from "@/app/(auth)/auth/page";
 import DashboardNav from "@/components/dashboard-nav";
+import { Hind, Poppins } from "next/font/google";
+import { toast } from "react-hot-toast";
+
+const hind = Hind({ subsets: ["latin"], weight: ["500"] });
+const poppins = Poppins({ subsets: ["latin"], weight: ["500"] });
 
 interface IDocument {
   id: string;
@@ -47,6 +52,211 @@ const Dashboard = () => {
   const [subAdmins, setSubAdmins] = useState<ILoginDatadata[]>([]);
   const [filteredSubAdmins, setFIlteredSubAdmins] =
     useState<ILoginDatadata[]>();
+  const [upload, setUpload] = useState<string>();
+  const [uploadName, setUploadName] = useState<string>();
+  const [uploadSize, setUploadSize] = useState<number>();
+  const [progress, setProgress] = useState(0);
+  const [uploadComplete, setUploadComplete] = useState(false);
+
+  const { user } = useAuthContext();
+
+  const handleFileUpload = (
+    e: ChangeEvent<HTMLInputElement>
+  ): void | string => {
+    const file = new FileReader();
+
+    if (e.target.files) {
+      if (e.target.files[0].type !== "application/pdf")
+        return toast.error("Document can only be pdf");
+      setUploadName(e.target.files[0].name);
+      setUploadSize(e.target.files[0].size / 1000000);
+
+      file.readAsDataURL(e.target.files[0]);
+
+      file.onload = () => {
+        setUpload(file.result as string);
+      };
+    }
+  };
+
+  useEffect(() => {
+    const count = [20, 40, 60, 80, 100];
+    let i = 0;
+
+    setUploadComplete(false);
+    const increaseProgress = setInterval(() => {
+      if (i < count.length) {
+        setProgress(count[i]);
+
+        if (count[i] === 100) {
+          setUploadComplete(true);
+        }
+
+        i++;
+      } else {
+        clearInterval(increaseProgress);
+      }
+    }, 250);
+
+    return () => clearInterval(increaseProgress);
+  }, [uploadName, uploadSize]);
+
+  useEffect(() => {
+    const handleGetDocuments = async () => {
+      setLoading(true);
+      const res = await fetch(
+        user?.user.role === "SUB_ADMIN"
+          ? `http://localhost:8000/api/v1/document/program/${user?.user.program}`
+          : user?.user.role === "ADMIN"
+          ? "http://localhost:8000/api/v1/auth/sub-admins"
+          : "",
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+
+      const data = (await res.json()) as IDocuments & ISubAdmins;
+
+      if (user?.user.role === "SUB_ADMIN") {
+        setDocuments(data.documents);
+        setFilteredDocuments(data.documents);
+      }
+
+      if (user?.user.role === "ADMIN") {
+        setSubAdmins(data.sub_admins);
+        setFIlteredSubAdmins(data.sub_admins);
+      }
+
+      setLoading(false);
+    };
+
+    handleGetDocuments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleSubmitDocument = async () => {
+    const res = await fetch(
+      "http://localhost:8000/api/v1/document/upload-document",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        credentials: "include",
+
+        body: JSON.stringify({
+          name:
+            uploadName?.charAt(0).toUpperCase() +
+            (uploadName as string)
+              .slice(1)
+              .replace("_", "")
+              .replace(".pdf", "")
+              .toLowerCase(),
+          document: upload,
+        }),
+      }
+    );
+
+    if (res.status === 409)
+      return toast.error("A document has already been submitted");
+    if (res.status === 500) return toast.error("Something went wrong");
+
+    return toast.success("Document uploaded succesfully");
+  };
+
+  if (user?.user.role === "RESEARCHER") {
+    return (
+      <main className="bg-[#F5F6FA] h-screen flex text-[14px]">
+        <DashboardNav />
+        <input
+          type="file"
+          id="file_upload"
+          hidden
+          onChange={handleFileUpload}
+          accept=".pdf"
+        />
+        <div className="w-[85%] flex flex-col justify-start pt-6 items-center">
+          <label
+            htmlFor="file_upload"
+            className={`w-[95%] border-dashed border-[2px] border-[#CACACA] h-[40%] rounded-[6px] flex flex-col items-center justify-center text-[24px] ${hind.className} cursor-pointer mb-20`}
+          >
+            <div className="bg-[#F5F5F5] w-[100px] h-[100px] rounded-full mx-auto flex items-center justify-center mb-4">
+              <Image
+                src="/document-upload.svg"
+                width={60}
+                height={60}
+                alt="file-upload"
+              />
+            </div>
+
+            <p className="mb-4">
+              <span className="text-[#A020F0]">Click to Upload</span> or drag
+              and drop
+            </p>
+
+            <p>(Max. File size: 25 MB)</p>
+          </label>
+
+          {uploadName && uploadName?.length > 0 && (
+            <div
+              className={`w-[328px] bg-white border-[2px] rounded-[6px] pt-4 px-4 pb-8 ${poppins.className} mb-20`}
+            >
+              <div className="flex justify-between items-start mb-1">
+                <div className="flex items-start gap-x-5">
+                  <Image
+                    src="/document-text.svg"
+                    width={20}
+                    height={20}
+                    alt=""
+                  />
+                  <div>
+                    <p className="font-[500]">{uploadName}</p>
+                    <p className="text-[12px] text-[#989692]">
+                      {uploadSize?.toFixed(3)}MB
+                    </p>
+                  </div>
+                </div>
+
+                <Image
+                  src={uploadComplete ? "/tick-circle.svg" : "/trash.svg"}
+                  width={20}
+                  height={20}
+                  className={uploadComplete ? "" : "cursor-pointer"}
+                  alt=""
+                  onClick={
+                    uploadComplete ? () => {} : () => setUploadName(undefined)
+                  }
+                />
+              </div>
+
+              <div className="flex justify-between items-center">
+                <div className="bg-[#F5F5F5] w-[259px] h-[6px] rounded-[4px]">
+                  <div
+                    className={`${
+                      uploadComplete ? "bg-[#50C878]" : "bg-[#A020F0]"
+                    } w-[${progress}%] h-full rounded-[4px]`}
+                  />
+                </div>
+                <p className="text-[12px]">{progress}%</p>
+              </div>
+            </div>
+          )}
+
+          <button
+            className={`${
+              upload ? "bg-[#A020F0]" : "bg-[#d6b3ec]"
+            } w-[250px] py-3 text-white ${poppins.className} rounded-[6px]`}
+            onClick={handleSubmitDocument}
+            disabled={upload ? false : true}
+          >
+            Upload
+          </button>
+        </div>
+      </main>
+    );
+  }
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const userQuery = e.target.value;
@@ -139,45 +349,8 @@ const Dashboard = () => {
       setFIlteredSubAdmins(newArr);
     }
   };
-  useEffect(() => {
-    const handleGetDocuments = async () => {
-      setLoading(true);
-      const res = await fetch(
-        user?.user.role === "SUB_ADMIN"
-          ? `http://localhost:8000/api/v1/document/program/${user?.user.program}`
-          : user?.user.role === "ADMIN"
-          ? "http://localhost:8000/api/v1/auth/sub-admins"
-          : "",
-        {
-          method: "GET",
-          credentials: "include",
-        }
-      );
-
-      const data = (await res.json()) as IDocuments & ISubAdmins;
-
-      if (user?.user.role === "SUB_ADMIN") {
-        setDocuments(data.documents);
-        setFilteredDocuments(data.documents);
-      }
-
-      if (user?.user.role === "ADMIN") {
-        setSubAdmins(data.sub_admins);
-        setFIlteredSubAdmins(data.sub_admins);
-      }
-
-      setLoading(false);
-    };
-
-    handleGetDocuments();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const { user } = useAuthContext();
 
   if (!user || user?.message === "Token not found") return router.push("/auth");
-
-  console.log(subAdmins);
 
   if (loading)
     return (
@@ -220,13 +393,14 @@ const Dashboard = () => {
           <div className="flex items-center gap-x-6">
             <FaBell size={29} color="#4880FF" />
             {user?.user.avatar ? (
-              <Image
-                src={user?.user.avatar as string}
-                width={35}
-                height={35}
-                alt=""
-                className="rounded-full"
-              />
+              <div className="rounded-[50%] w-[55px] h-[50px] overflow-hidden border-[1px] flex items-center justify-center">
+                <Image
+                  src={user.user?.avatar as string}
+                  width={55}
+                  height={150}
+                  alt=""
+                />
+              </div>
             ) : (
               <div className="w-[50px] h-[52px] bg-red-800 rounded-full flex items-center justify-center text-white text-[16px]">
                 {user?.user?.lastname.charAt(0)}

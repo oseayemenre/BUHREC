@@ -246,7 +246,6 @@ const App = () => {
       </main>
     );
 
-  console.log(user);
   if (user?.status === "success") return router.push("/dashboard");
 
   return (

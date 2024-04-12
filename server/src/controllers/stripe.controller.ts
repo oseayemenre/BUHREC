@@ -8,6 +8,7 @@ import {
   createSubscription,
   findUserSubscription,
   updateUserSubscription,
+  findUserPayment,
 } from "../services/stripe.services";
 import { ErrorHandler } from "../utils/errorHandler";
 import { IResponse } from "../interfaces/response.interface";
@@ -50,7 +51,7 @@ export const createSession = catchAsync(
         },
       ],
       mode: "subscription",
-      success_url: URL,
+      success_url: "http://localhost:3000/dashboard",
       cancel_url: URL,
       billing_address_collection: "auto",
       metadata: {
@@ -119,5 +120,15 @@ export const webhook = catchAsync(
         message: "Subscription succesfully updated",
       });
     }
+  }
+);
+
+export const getPayment = catchAsync(
+  async (req: IRequestMiddleWare, res: Response) => {
+    const payment = await findUserPayment(req.user as string);
+
+    res.status(200).json({
+      payment,
+    });
   }
 );

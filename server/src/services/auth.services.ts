@@ -1,4 +1,4 @@
-import { Program, User } from "@prisma/client";
+import { Program, User, UserSubscription } from "@prisma/client";
 import { type TRegisterSchema } from "../schema/register.schema";
 import { prisma } from "../utils/prisma";
 

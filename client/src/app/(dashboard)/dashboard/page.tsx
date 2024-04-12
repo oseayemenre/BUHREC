@@ -8,12 +8,14 @@ import { FaBell } from "react-icons/fa";
 import Image from "next/image";
 import { useAuthContext } from "@/context/auth.context";
 import { useRouter } from "next/navigation";
-import { useState, useEffect, ChangeEvent, useRef } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import { FaSpinner } from "react-icons/fa6";
 import { ILoginDatadata } from "@/app/(auth)/auth/page";
 import DashboardNav from "@/components/dashboard-nav";
 import { Hind, Poppins } from "next/font/google";
 import { toast } from "react-hot-toast";
+import { IPayment, useWebhook } from "@/hooks/useWebhook";
+import { usePayment } from "@/context/payment.context";
 
 const hind = Hind({ subsets: ["latin"], weight: ["500"] });
 const poppins = Poppins({ subsets: ["latin"], weight: ["500"] });
@@ -57,8 +59,28 @@ const Dashboard = () => {
   const [uploadSize, setUploadSize] = useState<number>();
   const [progress, setProgress] = useState(0);
   const [uploadComplete, setUploadComplete] = useState(false);
+  const [protectedPage, setProtectedPage] = useState(false);
 
   const { user } = useAuthContext();
+
+  const { webhook } = useWebhook();
+
+  const { payment, setPayment } = usePayment();
+
+  console.log(payment);
+
+  useEffect(() => {
+    setPayment(webhook as IPayment);
+
+    if (
+      user?.user.role === "RESEARCHER" &&
+      (!payment || payment.payment?.userId !== user.user.id)
+    ) {
+      return setProtectedPage(true);
+    }
+
+    return setProtectedPage(false);
+  }, [webhook, user?.user.id, user?.user.role, payment, setPayment]);
 
   const handleFileUpload = (
     e: ChangeEvent<HTMLInputElement>
@@ -166,9 +188,49 @@ const Dashboard = () => {
     return toast.success("Document uploaded succesfully");
   };
 
+  const handlePayment = async () => {
+    const res = await fetch(
+      "http://localhost:8000/api/v1/stripe/create-session",
+      {
+        method: "GET",
+        credentials: "include",
+      }
+    );
+
+    const data = (await res.json()) as { url: string };
+
+    return (window.location.href = data.url);
+  };
+
   if (user?.user.role === "RESEARCHER") {
     return (
       <main className="bg-[#F5F6FA] h-screen flex text-[14px]">
+        {protectedPage && (
+          <div className="h-screen">
+            <div className="bg-black opacity-75 w-full h-screen absolute z-10" />
+            <div className="h-full w-full flex items-center justify-center">
+              <div className="w-[50%] h-[50%] bg-white z-50 absolute left-[400px] rounded-[6px] flex flex-col items-center justify-center">
+                <Image
+                  src="/blue-exclamation.png"
+                  width={200}
+                  height={200}
+                  alt=""
+                  priority
+                />
+                <p className="font-[700] text-[24px] mb-3">Account inactive</p>
+                <p className="mb-3">Payment is neccessary to acivate account</p>
+
+                <button
+                  className="mb-4 bg-[#3FA9F4] w-[200px] h-[50px] rounded-[4px] text-white"
+                  onClick={handlePayment}
+                >
+                  Make Payment
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         <DashboardNav />
         <input
           type="file"
@@ -373,7 +435,7 @@ const Dashboard = () => {
       </main>
     );
 
-  const header = ["ID", "NAME", "COURSE", "DATE", "DOCUMENT", "COURSE"];
+  const header = ["ID", "NAME", "COURSE", "DATE", "DOCUMENT", "STATUS"];
   const adminHeader = ["ID", "USERNAME", "NAME", "EMAIL", "PROGRAM", "JOINED"];
 
   return (
@@ -567,7 +629,8 @@ const Dashboard = () => {
                     <div>
                       <p className="text-center w-[100px]">
                         {" "}
-                        {user.user.program}
+                        {user.user.program.charAt(0).toUpperCase() +
+                          user.user.program.slice(1).toLowerCase()}
                       </p>
                     </div>
                     <div>
@@ -588,7 +651,16 @@ const Dashboard = () => {
                       </a>
                     </div>
                     <div>
-                      <p className="text-center w-[100px]">Course</p>
+                      <p
+                        className={`text-center w-[100px] ${
+                          document.document[0].status === "PENDING"
+                            ? "bg-[#E0D4FC] text-[#6226EF]"
+                            : "text-[#00B69B] bg-[#CCF0EB]"
+                        } h-[27px] text-[12px] flex items-center justify-center rounded-[4.5px] font-[600]`}
+                      >
+                        {document.document[0].status.charAt(0).toUpperCase() +
+                          document.document[0].status.slice(1).toLowerCase()}
+                      </p>
                     </div>
                   </div>
                 ))

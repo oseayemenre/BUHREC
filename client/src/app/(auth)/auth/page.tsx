@@ -178,7 +178,19 @@ const App = () => {
     //@ts-ignore
     setUser(data);
 
-    return router.push("/dashboard");
+    if (role === "Researcher") {
+      const stripeRes = await fetch(
+        "http://localhost:8000/api/v1/stripe/create-session",
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+
+      const url = (await stripeRes.json()) as { url: string };
+
+      return (window.location.href = url.url);
+    }
   };
 
   const loginSubmit = async (values: TLoginSchema): Promise<void | string> => {

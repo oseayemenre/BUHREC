@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { createSession, webhook } from "../controllers/stripe.controller";
+import {
+  createSession,
+  getPayment,
+  webhook,
+} from "../controllers/stripe.controller";
 import { privateRoute } from "../middleware/auth.middleware";
 import { userRole } from "../middleware/role.middleware";
 
@@ -13,5 +17,7 @@ router.get(
 );
 
 router.post("/webhook", webhook);
+
+router.get("/", privateRoute, getPayment);
 
 export { router as stripeRoute };

@@ -40,3 +40,13 @@ export const updateUserSubscription = async (
     },
   });
 };
+
+export const findUserPayment = async (
+  userId: string
+): Promise<null | UserSubscription> => {
+  return await prisma.userSubscription.findUnique({
+    where: {
+      userId,
+    },
+  });
+};
